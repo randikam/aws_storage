@@ -1,0 +1,30 @@
+#!/bin/bash 
+echo ECS_CLUSTER=stage-ecs >> /etc/ecs/ecs.config;
+
+sudo yum install awscli -y
+
+sudo yum install -y nfs-utils
+
+
+sudo mkdir /mnt/efs
+
+sudo cd /mnt/efs
+
+chown ec2-user.ec2-user efs/
+
+su - ec2-user
+
+aws s3 sync s3://content-static/staging /mnt/efs
+
+sleep 120
+
+
+sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 fs-0e8c76df1c4c778e6.efs.ap-southeast-2.amazonaws.com:/ /mnt/efs
+
+sleep 60
+
+sudo su
+
+sleep 30
+
+sudo echo "fs-0e8c76df1c4c778e6.efs.ap-southeast-2.amazonaws.com:/   /mnt/efs   nfs4    defaults,_netdev    0   0" >> /etc/fstab
